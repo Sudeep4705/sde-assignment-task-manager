@@ -59,7 +59,7 @@ export function useTasks(): UseTasksState {
     });
   }
 
-  // ✅ Fixed: Only ONE useEffect to load data
+  //Fixed: Only ONE useEffect to load data
   useEffect(() => {
     let isMounted = true;
     async function load() {
@@ -89,7 +89,7 @@ export function useTasks(): UseTasksState {
     };
   }, []);
 
-  // (Deleted the malicious second useEffect here)
+  // Deleted the malicious second useEffect here
 
   const derivedSorted = useMemo<DerivedTask[]>(() => {
     const withRoi = tasks.map(withDerived);
