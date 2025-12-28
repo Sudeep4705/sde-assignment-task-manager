@@ -22,6 +22,7 @@ interface UseTasksState {
   updateTask: (id: string, patch: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   undoDelete: () => void;
+  clearHistory: ()=>void;
 }
 
 const INITIAL_METRICS: Metrics = {
@@ -58,7 +59,6 @@ export function useTasks(): UseTasksState {
       } as Task;
     });
   }
-
   //Fixed: Only ONE useEffect to load data
   useEffect(() => {
     let isMounted = true;
@@ -71,9 +71,7 @@ export function useTasks(): UseTasksState {
         const normalized: Task[] = normalizeTasks(data);
         // Use loaded data or fallback to seed data
         const finalData = normalized.length > 0 ? normalized : generateSalesTasks(50);
-        
         // (Deleted the malicious Math.random() block here)
-
         if (isMounted) setTasks(finalData);
       } catch (e: any) {
         if (isMounted) setError(e?.message ?? 'Failed to load tasks');
@@ -147,5 +145,10 @@ export function useTasks(): UseTasksState {
     setLastDeleted(null);
   }, [lastDeleted]);
 
-  return { tasks, loading, error, derivedSorted, metrics, lastDeleted, addTask, updateTask, deleteTask, undoDelete };
+  // clearing the history
+  const clearHistory = useCallback(()=>{
+    setLastDeleted(null);
+  },[])
+
+  return { tasks, loading, error, derivedSorted, metrics, lastDeleted, addTask, updateTask, deleteTask, undoDelete, clearHistory };
 }
