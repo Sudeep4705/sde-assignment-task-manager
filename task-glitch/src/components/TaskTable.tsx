@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, IconButton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import { 
+  Box, Button, Card, CardContent, IconButton, Stack, Table, TableBody, 
+  TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,6 +23,9 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
   const [editing, setEditing] = useState<Task | null>(null);
   const [details, setDetails] = useState<Task | null>(null);
 
+  // STATE FOR DELETE DIALOG
+  const [deleteId, setdeleteId] = useState<string | null>(null);
+
   const existingTitles = useMemo(() => tasks.map(t => t.title), [tasks]);
 
   const handleAddClick = () => {
@@ -36,6 +43,14 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
       onUpdate(id, rest);
     } else {
       onAdd(value as Omit<Task, 'id'>);
+    }
+  };
+
+  // NEW FUNCTION TO HANDLE CONFIRMATION
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      onDelete(deleteId);
+      setdeleteId(null);
     }
   };
 
@@ -85,12 +100,12 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                       <Tooltip title="Edit">
-                        <IconButton onClick={() => handleEditClick(t)} size="small">
+                        <IconButton onClick={(e) =>{e.stopPropagation(); handleEditClick(t)}} size="small">
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton onClick={() => onDelete(t.id)} size="small" color="error">
+                        <IconButton onClick={(e) => { e.stopPropagation();setdeleteId(t.id)}} size="small" color="error">
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -117,6 +132,22 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
         initial={editing}
       />
       <TaskDetailsDialog open={!!details} task={details} onClose={() => setDetails(null)} onSave={onUpdate} />
+
+        {/* 4. THE MISSING CONFIRMATION DIALOG */}
+      <Dialog open={!!deleteId} onClose={() => setdeleteId(null)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this task? This action can be undone briefly.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setdeleteId(null)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleConfirmDelete} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
