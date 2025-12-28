@@ -63,14 +63,14 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
     !!title.trim() &&
     !duplicateTitle &&
     typeof revenue === 'number' && revenue >= 0 &&
-    typeof timeTaken === 'number' && timeTaken >= 0 && // <--- Changed > 0 to >= 0
+    typeof timeTaken === 'number' && timeTaken >= 0 &&
     !!priority &&
     !!status;
 
   const handleSubmit = () => {
-    // <--- Removed auto-correct that forced 0 to become 1
-    const safeTime = typeof timeTaken === 'number' ? timeTaken : 0; 
+    const safeTime = typeof timeTaken === 'number' ? timeTaken : 0;
     
+    // ✅ FIX: Added createdAt and completedAt to satisfy TypeScript
     const payload: Omit<Task, 'id'> & { id?: string } = {
       title: title.trim(),
       revenue: typeof revenue === 'number' ? revenue : 0,
@@ -78,6 +78,8 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
       priority: ((priority || 'Medium') as Priority),
       status: ((status || 'Todo') as Status),
       notes: notes.trim() || undefined,
+      createdAt: initial ? initial.createdAt : new Date().toISOString(), // Use existing date or new one
+      completedAt: initial ? initial.completedAt : undefined,
       ...(initial ? { id: initial.id } : {}),
     };
     onSubmit(payload);
@@ -113,7 +115,7 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
               type="number"
               value={timeTaken}
               onChange={e => setTimeTaken(e.target.value === '' ? '' : Number(e.target.value))}
-              inputProps={{ min: 0, step: 1 }} // <--- FIX 3: Changed min from 1 to 0
+              inputProps={{ min: 0, step: 1 }}
               required
               fullWidth
             />
