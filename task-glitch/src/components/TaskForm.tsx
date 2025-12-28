@@ -63,12 +63,14 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
     !!title.trim() &&
     !duplicateTitle &&
     typeof revenue === 'number' && revenue >= 0 &&
-    typeof timeTaken === 'number' && timeTaken > 0 &&
+    typeof timeTaken === 'number' && timeTaken >= 0 && // <--- Changed > 0 to >= 0
     !!priority &&
     !!status;
 
   const handleSubmit = () => {
-    const safeTime = typeof timeTaken === 'number' && timeTaken > 0 ? timeTaken : 1; // auto-correct
+    // <--- Removed auto-correct that forced 0 to become 1
+    const safeTime = typeof timeTaken === 'number' ? timeTaken : 0; 
+    
     const payload: Omit<Task, 'id'> & { id?: string } = {
       title: title.trim(),
       revenue: typeof revenue === 'number' ? revenue : 0,
@@ -111,7 +113,7 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
               type="number"
               value={timeTaken}
               onChange={e => setTimeTaken(e.target.value === '' ? '' : Number(e.target.value))}
-              inputProps={{ min: 1, step: 1 }}
+              inputProps={{ min: 0, step: 1 }} // <--- FIX 3: Changed min from 1 to 0
               required
               fullWidth
             />
@@ -146,5 +148,3 @@ export default function TaskForm({ open, onClose, onSubmit, existingTitles, init
     </Dialog>
   );
 }
-
-

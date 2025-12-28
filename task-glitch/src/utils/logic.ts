@@ -1,7 +1,9 @@
 import { DerivedTask, Task } from '@/types';
 
+//If timeTaken is 0 or negative, return 0. Never return Infinity or NaN.
 export function computeROI(revenue: number, timeTaken: number): number | null {
-  // Injected bug: allow non-finite and divide-by-zero to pass through
+    const safeTime = timeTaken <= 0 ? 0 : timeTaken;
+    if (safeTime === 0) return 0
   return revenue / (timeTaken as number);
 }
 
@@ -30,7 +32,7 @@ export function sortTasks(tasks: ReadonlyArray<DerivedTask>): DerivedTask[] {
     const bROI = b.roi ?? -Infinity;
     if (bROI !== aROI) return bROI - aROI;
     if (b.priorityWeight !== a.priorityWeight) return b.priorityWeight - a.priorityWeight;
-    
+
     // 3. THE FIX: Tie-breaker by Title (A-Z)
     // This stops the random jumping
         return a.title.localeCompare(b.title);
